@@ -6,7 +6,12 @@ My name is Alessio Parolini, and I am a software developer with a passion for cr
 
 import httpx as hx
 
-NASA_API_KEY = "" #put yours
+import os
+
+from dotenv import load_dotenv
+
+import json
+
 
 def main(api):
 
@@ -16,7 +21,11 @@ def main(api):
 
         print("Request is good!")
 
-        print(asteroid.json())
+        data = asteroid.json()
+
+        with open("neo.json", "w") as file:
+
+            json.dump(data, file)
 
     else:
 
@@ -25,5 +34,10 @@ def main(api):
     return
 
     
+if __name__ == "__main__":
 
-main(NASA_API_KEY)
+    load_dotenv()
+
+    NASA_API_KEY = os.getenv("NASA_API_KEY")
+
+    main(NASA_API_KEY)
