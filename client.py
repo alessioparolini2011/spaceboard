@@ -7,7 +7,7 @@ import datetime as dt
 
 class asteroid: #creating the class to saves NEOs with 
 
-    def __init__(self, name, id, diameter, speed, dis, orbit, hazard):
+    def __init__(self, name: str, id: str, diameter: float, speed: float, dis: float, orbit: str, hazard: bool):
 
         self.name = name
 
@@ -25,7 +25,7 @@ class asteroid: #creating the class to saves NEOs with
 
 class asteroidUs: #creating the class to save NEOs with US metric
 
-    def __init__(self, name, id, diameter, speed, dis, orbit, hazard):
+    def __init__(self, name: str, id: str, diameter: float, speed: float, dis: float, orbit: str, hazard: bool):
 
         self.name = name
 
@@ -55,17 +55,28 @@ def neo_req(api):
 
     if asteroid.status_code == 200:
 
-        print("--RESOURCES ACHIVED SUCCESSFULLY--\nREQUEST ENDED")
+        print("\n--RESOURCES ACHIVED SUCCESSFULLY--\nREQUEST ENDED\n")
 
         data = asteroid.json()
 
+        return classifier(json=data, today=today, yesterday=yesterday, tomorrow=tomorrow)
+
+
     else:
 
-        print(f"--ERROR: {asteroid.status_code}--\nSOMETHING WENT WRONG")
+        print(f"\n--ERROR: {asteroid.status_code}--\nSOMETHING WENT WRONG\n")
 
     return
 
-def classifier(json, today, tomorrow, yesterday):
+def classifier(json, today, tomorrow, yesterday) -> tuple[list[asteroid], list[asteroid], list[asteroid]]:
+
+    td_asteroids: list[asteroid] = []
+
+    yd_asteroids: list[asteroid] = []
+
+    tm_asteroids: list[asteroid] = []
+
+
 
     for day in json["near_earth_object"]:
 
@@ -73,10 +84,62 @@ def classifier(json, today, tomorrow, yesterday):
 
             for neo in json[today]:
 
-                diameter = (neo["estimated_diameter"]["meters"]["estimated_diameter_min"]+neo["estimated_diameter"]["meters"]["estimated_diameter_maz"])/2
+                diameter = (neo["estimated_diameter"]["meters"]["estimated_diameter_min"]+neo["estimated_diameter"]["meters"]["estimated_diameter_max"])/2
 
                 approach = neo["close_approach_data"][0] #get the closest approach datas (only takes the first approach, most of times is the only. )
 
                 if approach["orbiting_body"] == "Earth":
 
-                    asteroid(name=neo["name"], id=neo["id"], diameter=diameter, speed=approach["relative_velocity"]["kilometers_per_hour"], dis=approach )
+                    neo = asteroid(name=neo["name"], 
+                             id=neo["id"], 
+                             diameter=diameter.round(2), 
+                             speed=approach["relative_velocity"]["kilometers_per_hour"].round(2), 
+                             dis=approach["miss_distance"]["kilometres."].round(2),
+                             orbit = approach["orbiting_body"],
+                             hazard= neo["is_potentially_hazardous_asteroid"])
+
+                    td_asteroids.append(neo)
+
+        if day == yesterday:
+
+            for neo in json[yesterday]:
+
+                diameter = (neo["estimated_diameter"]["meters"]["estimated_diameter_min"]+neo["estimated_diameter"]["meters"]["estimated_diameter_max"])/2
+
+                approach = neo["close_approach_data"][0] #get the closest approach datas (only takes the first approach, most of times is the only. )
+
+                if approach["orbiting_body"] == "Earth":
+
+                    neo = asteroid(name=neo["name"], 
+                             id=neo["id"], 
+                             diameter=diameter.round(2), 
+                             speed=approach["relative_velocity"]["kilometers_per_hour"].round(2), 
+                             dis=approach["miss_distance"]["kilometres."].round(2),
+                             orbit = approach["orbiting_body"],
+                             hazard= neo["is_potentially_hazardous_asteroid"])
+
+                    yd_asteroids.append(neo)
+
+        if day == tomorrow:
+
+            for neo in json[tomorrow]:
+
+                diameter = (neo["estimated_diameter"]["meters"]["estimated_diameter_min"]+neo["estimated_diameter"]["meters"]["estimated_diameter_max"])/2
+
+                approach = neo["close_approach_data"][0] #get the closest approach datas (only takes the first approach, most of times is the only. )
+
+                if approach["orbiting_body"] == "Earth":
+
+                    neo = asteroid(name=neo["name"], 
+                             id=neo["id"], 
+                             diameter=diameter.round(2), 
+                             speed=approach["relative_velocity"]["kilometers_per_hour"].round(2), 
+                             dis=approach["miss_distance"]["kilometres."].round(2),
+                             orbit = approach["orbiting_body"],
+                             hazard= neo["is_potentially_hazardous_asteroid"])
+
+                    tm_asteroids.append(neo) 
+
+    print("\n--RESOURCES STORED SUCCESSFULLY--\n")
+
+    return td_asteroids, yd_asteroids, tm_asteroids #return the lists of neos
