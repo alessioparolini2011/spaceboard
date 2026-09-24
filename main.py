@@ -8,7 +8,9 @@ import os
 
 from dotenv import load_dotenv
 
-import client
+from cli import spaceboard
+
+from client import neo_req
 
 def main():
 
@@ -17,7 +19,11 @@ def main():
     NASA_API_KEY = os.getenv("NASA_API_KEY")
 
 
-    client.neo_req(NASA_API_KEY)
+    neo_req(NASA_API_KEY)
+
+    app = spaceboard()
+
+    app.run()
     
 if __name__ == "__main__":
 
