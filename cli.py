@@ -1,6 +1,6 @@
 from textual.app import App, ComposeResult
 
-from textual.widgets import Footer, Label
+from textual.widgets import Footer, Label, DataTable
 
 from textual.containers import Center
 
@@ -15,6 +15,7 @@ class spaceboard(App):
     text-align: center;
     height: auto; 
     width: auto;}
+
     #des {
     color: #F0F8FF;
     text-align: center;
@@ -23,6 +24,12 @@ class spaceboard(App):
     margin: 1;
     border: round #F0F8FF;
     padding: 0 2
+    }
+
+    #headtab {
+    width: 100%;
+    height: 1;
+    color: #F0F8FF;
     }
     """
 
