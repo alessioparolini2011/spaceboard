@@ -7,11 +7,13 @@ import datetime as dt
 
 class asteroid: #creating the class to saves NEOs with 
 
-    def __init__(self, name: str, id: str, diameter: float, speed: float, dis: float, orbit: str, hazard: bool):
+    def __init__(self, name: str, id: str, date: str, diameter: float, speed: float, dis: float, orbit: str, hazard: bool):
 
         self.name = name
 
         self.id = id
+
+        self.date = date
 
         self.diam = diameter
 
@@ -25,11 +27,13 @@ class asteroid: #creating the class to saves NEOs with
 
 class asteroidUs: #creating the class to save NEOs with US metric
 
-    def __init__(self, name: str, id: str, diameter: float, speed: float, dis: float, orbit: str, hazard: bool):
+    def __init__(self, name: str, id: str, date: str, diameter: float, speed: float, dis: float, orbit: str, hazard: bool):
 
         self.name = name
 
         self.id = id
+
+        self.date = date
 
         self.diam = diameter
 
@@ -47,9 +51,9 @@ def neo_req(api):
 
     today = current_date.isoformat()
 
-    yesterday = current_date - dt.timedelta(days=1)
+    yesterday = (current_date - dt.timedelta(days=1)).isoformat()
 
-    tomorrow = current_date + dt.timedelta(days=1)
+    tomorrow = (current_date + dt.timedelta(days=1)).isoformat()
 
     asteroid = hx.get(f"https://api.nasa.gov/neo/rest/v1/feed?start_date={yesterday}&end_date={tomorrow}&api_key={api}")
 
@@ -68,78 +72,46 @@ def neo_req(api):
 
     return
 
-def classifier(json, today, tomorrow, yesterday) -> tuple[list[asteroid], list[asteroid], list[asteroid]]:
+def classifier(json, today, tomorrow, yesterday) -> tuple[list[asteroid], list[asteroid]]:
 
-    td_asteroids: list[asteroid] = []
+    asteroids: asteroid = [] #to save neos with standard metric
 
-    yd_asteroids: list[asteroid] = []
+    asteroidsUS : asteroid = [] #to save neos with US metric
 
-    tm_asteroids: list[asteroid] = []
+    for day, neos_list in json["near_earth_objects"].items():
 
+        for neos in neos_list:
 
+            diameter = (neos["estimated_diameter"]["meters"]["estimated_diameter_min"]+neos["estimated_diameter"]["meters"]["estimated_diameter_max"])/2
 
-    for day in json["near_earth_object"]:
+            diameterUS = (neos["estimated_diameter"]["feet"]["estimated_diameter_min"]+neos["estimated_diameter"]["feet"]["estimated_diameter_max"])/2
 
-        if day == today:
+            approach = neos["close_approach_data"][0] #get the closest approach datas (only takes the first approach, most of times is the only. )
 
-            for neo in json[today]:
+            if approach["orbiting_body"] == "Earth":
 
-                diameter = (neo["estimated_diameter"]["meters"]["estimated_diameter_min"]+neo["estimated_diameter"]["meters"]["estimated_diameter_max"])/2
+                neo = asteroid(name=neos["name"], 
+                                id=neos["id"], 
+                                date=day,
+                                diameter=diameter, 
+                                speed=float(approach["relative_velocity"]["kilometers_per_hour"]), 
+                                dis=float(approach["miss_distance"]["kilometers"]),
+                                orbit = approach["orbiting_body"],
+                                hazard= neos["is_potentially_hazardous_asteroid"])
 
-                approach = neo["close_approach_data"][0] #get the closest approach datas (only takes the first approach, most of times is the only. )
+                neoUS = asteroid(name=neos["name"], 
+                                id=neos["id"], 
+                                date=day,
+                                diameter=diameterUS, 
+                                speed=float(approach["relative_velocity"]["miles_per_hour"]), 
+                                dis=float(approach["miss_distance"]["miles"]),
+                                orbit = approach["orbiting_body"],
+                                hazard= neos["is_potentially_hazardous_asteroid"])
 
-                if approach["orbiting_body"] == "Earth":
+                asteroids.append(neo)
 
-                    neo = asteroid(name=neo["name"], 
-                             id=neo["id"], 
-                             diameter=diameter.round(2), 
-                             speed=approach["relative_velocity"]["kilometers_per_hour"].round(2), 
-                             dis=approach["miss_distance"]["kilometres."].round(2),
-                             orbit = approach["orbiting_body"],
-                             hazard= neo["is_potentially_hazardous_asteroid"])
-
-                    td_asteroids.append(neo)
-
-        if day == yesterday:
-
-            for neo in json[yesterday]:
-
-                diameter = (neo["estimated_diameter"]["meters"]["estimated_diameter_min"]+neo["estimated_diameter"]["meters"]["estimated_diameter_max"])/2
-
-                approach = neo["close_approach_data"][0] #get the closest approach datas (only takes the first approach, most of times is the only. )
-
-                if approach["orbiting_body"] == "Earth":
-
-                    neo = asteroid(name=neo["name"], 
-                             id=neo["id"], 
-                             diameter=diameter.round(2), 
-                             speed=approach["relative_velocity"]["kilometers_per_hour"].round(2), 
-                             dis=approach["miss_distance"]["kilometres."].round(2),
-                             orbit = approach["orbiting_body"],
-                             hazard= neo["is_potentially_hazardous_asteroid"])
-
-                    yd_asteroids.append(neo)
-
-        if day == tomorrow:
-
-            for neo in json[tomorrow]:
-
-                diameter = (neo["estimated_diameter"]["meters"]["estimated_diameter_min"]+neo["estimated_diameter"]["meters"]["estimated_diameter_max"])/2
-
-                approach = neo["close_approach_data"][0] #get the closest approach datas (only takes the first approach, most of times is the only. )
-
-                if approach["orbiting_body"] == "Earth":
-
-                    neo = asteroid(name=neo["name"], 
-                             id=neo["id"], 
-                             diameter=diameter.round(2), 
-                             speed=approach["relative_velocity"]["kilometers_per_hour"].round(2), 
-                             dis=approach["miss_distance"]["kilometres."].round(2),
-                             orbit = approach["orbiting_body"],
-                             hazard= neo["is_potentially_hazardous_asteroid"])
-
-                    tm_asteroids.append(neo) 
+                asteroidsUS.append(neoUS)
 
     print("\n--RESOURCES STORED SUCCESSFULLY--\n")
 
-    return td_asteroids, yd_asteroids, tm_asteroids #return the lists of neos
+    return asteroids #return the lists of neos
