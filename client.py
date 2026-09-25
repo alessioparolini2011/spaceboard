@@ -11,9 +11,9 @@ class NasaError(Exception):
 
     pass
 
-class asteroid: #creating the class to saves NEOs with 
+class neo: #creating the class to saves NEOs with 
 
-    def __init__(self, name: str, id: str, date: str, diameter: float, speed: float, dis: float, orbit: str, hazard: bool):
+    def __init__(self, name: str, id: str, date: str, diameter: float, speed: float, dis: float, hazard: bool):
 
         self.name = name
 
@@ -26,14 +26,12 @@ class asteroid: #creating the class to saves NEOs with
         self.speed = speed
 
         self.dis = dis
-
-        self.orbit = orbit 
 
         self.hazard = hazard
 
-class asteroidUs: #creating the class to save NEOs with US metric
+class neoUs: #creating the class to save NEOs with US metric
 
-    def __init__(self, name: str, id: str, date: str, diameter: float, speed: float, dis: float, orbit: str, hazard: bool):
+    def __init__(self, name: str, id: str, date: str, diameter: float, speed: float, dis: float, hazard: bool):
 
         self.name = name
 
@@ -46,8 +44,6 @@ class asteroidUs: #creating the class to save NEOs with US metric
         self.speed = speed
 
         self.dis = dis
-
-        self.orbit = orbit
 
         self.hazard = hazard
 
@@ -86,16 +82,16 @@ def neo_req(api):
 
     data = request.json()
 
-    return classifier(json=data, today=today, yesterday=yesterday, tomorrow=tomorrow)
+    return classifier(json_data=data)
 
 
-def classifier(json, today, tomorrow, yesterday) -> tuple[list[asteroid], list[asteroid]]:
+def classifier(json_data) -> tuple[list[neo], list[neoUs]]:
 
-    asteroids: asteroid = [] #to save neos with standard metric
+    neo_list: neo = [] #to save neos with standard metric
 
-    asteroidsUS : asteroid = [] #to save neos with US metric
+    neo_list_US: neoUs = [] #to save neos with US metric
 
-    for day, neos_list in json["near_earth_objects"].items():
+    for day, neos_list in json_data["near_earth_objects"].items():
 
         for neos in neos_list:
 
@@ -107,28 +103,26 @@ def classifier(json, today, tomorrow, yesterday) -> tuple[list[asteroid], list[a
 
             if approach["orbiting_body"] == "Earth":
 
-                neo = asteroid(name=neos["name"], 
+                neo_object = neo(name=neos["name"], 
                                 id=neos["id"], 
                                 date=day,
                                 diameter=diameter, 
                                 speed=float(approach["relative_velocity"]["kilometers_per_hour"]), 
                                 dis=float(approach["miss_distance"]["kilometers"]),
-                                orbit = approach["orbiting_body"],
                                 hazard= neos["is_potentially_hazardous_asteroid"])
 
-                neoUS = asteroid(name=neos["name"], 
+                neoUS_object = neoUs(name=neos["name"], 
                                 id=neos["id"], 
                                 date=day,
                                 diameter=diameterUS, 
                                 speed=float(approach["relative_velocity"]["miles_per_hour"]), 
                                 dis=float(approach["miss_distance"]["miles"]),
-                                orbit = approach["orbiting_body"],
                                 hazard= neos["is_potentially_hazardous_asteroid"])
 
-                asteroids.append(neo)
+                neo_list.append(neo_object)
 
-                asteroidsUS.append(neoUS)
+                neo_list_US.append(neoUS_object)
 
     print("\n--RESOURCES STORED SUCCESSFULLY--\n")
 
-    return asteroids #return the lists of neos
+    return neo_list, neo_list_US #return the lists of neos
