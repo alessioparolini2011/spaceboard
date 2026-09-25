@@ -4,10 +4,20 @@ from textual.widgets import Footer, Label, DataTable
 
 from textual.containers import Center
 
+from textual import work
+
+from client import neo_req, neo, neoUs
+
 
 class spaceboard(App):
 
-    BINDINGS = [("e", "exit", "Close the program")]
+    def __init__(self, api, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+
+        self.api = api
+
+    BINDINGS = [("e", "exit", "Close the program"), ("r", "refresh_data", "Refresh datas")]
 
     CSS = """
     #title {
@@ -26,10 +36,12 @@ class spaceboard(App):
     padding: 0 2
     }
 
-    #headtab {
-    width: 100%;
-    height: 1;
+    #neotab {
+    min-width: 100%;
+    width: auto;
+    height: auto;
     color: #F0F8FF;
+    background: #191970;
     }
     """
 
@@ -56,15 +68,46 @@ class spaceboard(App):
             yield Label("This is [b]spaceboard[/b], a space weather dashboard to visualize NEO (Near Earth Objects) for today, yesterday and tomorrow.\nIt was created by Alessio Parolini in September 2026 for Hack Club X NASA event [b]Stardance[/b].",
                         id="des")
 
+        table = DataTable(id="neotab")
+
+        table.show_horizontal_scrollbar = True
+        table.show_vertical_scrollbar = True
+        table.cursor_type = "row"
+        table.zebra_stripes = True
+
+        yield table
+
         yield Footer()
+
+    def on_mount(self) -> None:
+
+        table = self.query_one("#neotab", DataTable)
+
+        table.add_columns("NAME", "ID", "DIAMETER (m)", "SPEED (Km/h)", "DISTANCE (Km)", "POTENTIALLY HAZARDOUS?" )
+
+        self.tab_update(self.api)
+
+    
+    @work(thread=True)
+    def tab_update(self, api) -> None:
+
+        table = self.query_one("#neotab", DataTable)
+
+        neo_list, neo_list_US = neo_req(api)
+
+        for neo_object in neo_list:
+
+            table.add_row(neo_object.name, neo_object.id, neo_object.diam, neo_object.speed, neo_object.dis, "[red]YES!​⚠️​[/red]" if neo_object.hazard else "[green]NO[/green]")
 
     def action_exit(self) -> None:
 
         self.exit()
 
 
-if __name__ == "__main__":
+    def action_refresh_data(self) -> None:
 
-    app = spaceboard()
+        table = self.query_one("#neotab", DataTable)
 
-    app.run()
+        table.clear()
+
+        self.tab_update(self.api)
