@@ -4,6 +4,12 @@ import json as js
 
 import datetime as dt
 
+client = hx.Client(timeout=30.0,
+                   base_url="https://api.nasa.gov")
+
+class NasaError(Exception):
+
+    pass
 
 class asteroid: #creating the class to saves NEOs with 
 
@@ -55,22 +61,33 @@ def neo_req(api):
 
     tomorrow = (current_date + dt.timedelta(days=1)).isoformat()
 
-    asteroid = hx.get(f"https://api.nasa.gov/neo/rest/v1/feed?start_date={yesterday}&end_date={tomorrow}&api_key={api}")
+    try:
 
-    if asteroid.status_code == 200:
+        request = client.get("neo/rest/v1/feed", params={"start_date" : yesterday, "end_date" : tomorrow, "api_key" : api})
 
-        print("\n--RESOURCES ACHIVED SUCCESSFULLY--\nREQUEST ENDED\n")
+        request.raise_for_status()
 
-        data = asteroid.json()
+    except hx.HTTPStatusError as e:
 
-        return classifier(json=data, today=today, yesterday=yesterday, tomorrow=tomorrow)
+        raise NasaError(f"Nasa Server Error: {e.response.status_code}")
+
+    except hx.TimeoutException as e:
+
+        raise NasaError("Timeout expired.")
+
+    except hx.ConnectError as e:
+
+        raise NasaError(f"No connection with NASA Server: {e}")
+
+    except hx.RequestError as e:
+
+        raise NasaError(f"Generic network error: {e}")
 
 
-    else:
+    data = request.json()
 
-        print(f"\n--ERROR: {asteroid.status_code}--\nSOMETHING WENT WRONG\n")
+    return classifier(json=data, today=today, yesterday=yesterday, tomorrow=tomorrow)
 
-    return
 
 def classifier(json, today, tomorrow, yesterday) -> tuple[list[asteroid], list[asteroid]]:
 
