@@ -82,7 +82,7 @@ def neo_req(api):
 
     data = request.json()
 
-    return classifier(json_data=data)
+    return classifier(json_data=data), today, yesterday, tomorrow
 
 
 def classifier(json_data) -> tuple[list[neo], list[neoUs]]:
