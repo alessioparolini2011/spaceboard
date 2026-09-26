@@ -11,13 +11,25 @@ from client import neo_req, neo, neoUs
 
 class spaceboard(App):
 
-    def __init__(self, api, *args, **kwargs):
+    def __init__(self, api, today, yesterday, tomorrow, *args, **kwargs):
 
         super().__init__(*args, **kwargs)
 
         self.api = api
 
-    BINDINGS = [("e", "exit", "Close the program"), ("r", "refresh_data", "Refresh datas")]
+        self.td = today
+
+        self.yd = yesterday
+
+        self.tm = tomorrow
+
+        self.list: neo = []
+
+        self.list_US: neoUs = []
+
+        self.unit = True
+
+    BINDINGS = [("e", "exit", "Close the program"), ("c", "change_units", "Units: (Metric/US)")]
 
     CSS = """
     #title {
@@ -37,7 +49,6 @@ class spaceboard(App):
     }
 
     #neotab {
-    min-width: 100%;
     width: auto;
     height: auto;
     color: #F0F8FF;
@@ -77,37 +88,46 @@ class spaceboard(App):
 
         yield table
 
-        yield Footer()
+        yield Footer(show_command_palette=False)
 
     def on_mount(self) -> None:
 
-        table = self.query_one("#neotab", DataTable)
-
-        table.add_columns("NAME", "ID", "DIAMETER (m)", "SPEED (Km/h)", "DISTANCE (Km)", "POTENTIALLY HAZARDOUS?" )
-
-        self.tab_update(self.api)
-
+        self.data_update(self.api)
     
     @work(thread=True)
-    def tab_update(self, api) -> None:
+    def data_update(self, api) -> None:
 
-        table = self.query_one("#neotab", DataTable)
+        self.list, self.list_US = neo_req(api)
 
-        neo_list, neo_list_US = neo_req(api)
+        self.call_from_thread(self._store_data)
 
-        for neo_object in neo_list:
 
-            table.add_row(neo_object.name, neo_object.id, neo_object.diam, neo_object.speed, neo_object.dis, "[red]YES!​⚠️​[/red]" if neo_object.hazard else "[green]NO[/green]")
+
+    def _store_data(self, day, imperial=False): #created in tab_update to not lose the 2 lists
+
+            table = self.query_one("#neotab", DataTable)
+
+            table.clear(columns=True)
+
+            table.add_columns(
+                "NAME", 
+                "ID", 
+                f"DIAMETER ({'ft' if imperial else 'm'})",
+                f"SPEED ({'mph' if imperial else 'Km/h'})",
+                f"DISTANCE ({'mi' if imperial else 'Km'})",
+                "POTENTIALLY HAZARDOUS?"
+            )
+            
+            for neo_object in (self.list if imperial else self.list_US):
+
+                table.add_row(neo_object.name, neo_object.id, f"{neo_object.diam:,.3f}", f"{neo_object.speed:,.3f}", f"{neo_object.dis:,.3f}", "[red]YES!​⚠️​[/red]" if neo_object.hazard else "[green]NO[/green]")
 
     def action_exit(self) -> None:
 
         self.exit()
 
+    def action_change_units(self) -> None:
 
-    def action_refresh_data(self) -> None:
+        self._store_data(imperial=self.unit)
 
-        table = self.query_one("#neotab", DataTable)
-
-        table.clear()
-
-        self.tab_update(self.api)
+        self.unit = not self.unit
