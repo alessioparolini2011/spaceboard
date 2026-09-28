@@ -2,36 +2,26 @@ import httpx as hx
 
 import json as js
 
-import datetime as dt
+client = hx.Client(timeout=30.0, base_url="https://api.nasa.gov")
 
-client = hx.Client(timeout=30.0,
-                   base_url="https://api.nasa.gov")
 
 class NasaError(Exception):
 
     pass
 
-class neo: #creating the class to saves NEOs with 
 
-    def __init__(self, name: str, id: str, date: str, diameter: float, speed: float, dis: float, hazard: bool):
+class neo:  # creating the class to saves NEOs with
 
-        self.name = name
-
-        self.id = id
-
-        self.date = date
-
-        self.diam = diameter
-
-        self.speed = speed
-
-        self.dis = dis
-
-        self.hazard = hazard
-
-class neoUs: #creating the class to save NEOs with US metric
-
-    def __init__(self, name: str, id: str, date: str, diameter: float, speed: float, dis: float, hazard: bool):
+    def __init__(
+        self,
+        name: str,
+        id: str,
+        date: str,
+        diameter: float,
+        speed: float,
+        dis: float,
+        hazard: bool,
+    ):
 
         self.name = name
 
@@ -47,19 +37,43 @@ class neoUs: #creating the class to save NEOs with US metric
 
         self.hazard = hazard
 
-def neo_req(api):
 
-    current_date = dt.date.today() #get the current data for the reqeust
+class neoUs:  # creating the class to save NEOs with US metric
 
-    today = current_date.isoformat()
+    def __init__(
+        self,
+        name: str,
+        id: str,
+        date: str,
+        diameter: float,
+        speed: float,
+        dis: float,
+        hazard: bool,
+    ):
 
-    yesterday = (current_date - dt.timedelta(days=1)).isoformat()
+        self.name = name
 
-    tomorrow = (current_date + dt.timedelta(days=1)).isoformat()
+        self.id = id
+
+        self.date = date
+
+        self.diam = diameter
+
+        self.speed = speed
+
+        self.dis = dis
+
+        self.hazard = hazard
+
+
+def neo_req(api, today, yesterday, tomorrow):
 
     try:
 
-        request = client.get("neo/rest/v1/feed", params={"start_date" : yesterday, "end_date" : tomorrow, "api_key" : api})
+        request = client.get(
+            "neo/rest/v1/feed",
+            params={"start_date": yesterday, "end_date": tomorrow, "api_key": api},
+        )
 
         request.raise_for_status()
 
@@ -79,45 +93,56 @@ def neo_req(api):
 
         raise NasaError(f"Generic network error: {e}")
 
-
     data = request.json()
 
-    return classifier(json_data=data), today, yesterday, tomorrow
+    return classifier(json_data=data)
 
 
 def classifier(json_data) -> tuple[list[neo], list[neoUs]]:
 
-    neo_list: neo = [] #to save neos with standard metric
+    neo_list: neo = []  # to save neos with standard metric
 
-    neo_list_US: neoUs = [] #to save neos with US metric
+    neo_list_US: neoUs = []  # to save neos with US metric
 
     for day, neos_list in json_data["near_earth_objects"].items():
 
         for neos in neos_list:
 
-            diameter = (neos["estimated_diameter"]["meters"]["estimated_diameter_min"]+neos["estimated_diameter"]["meters"]["estimated_diameter_max"])/2
+            diameter = (
+                neos["estimated_diameter"]["meters"]["estimated_diameter_min"]
+                + neos["estimated_diameter"]["meters"]["estimated_diameter_max"]
+            ) / 2
 
-            diameterUS = (neos["estimated_diameter"]["feet"]["estimated_diameter_min"]+neos["estimated_diameter"]["feet"]["estimated_diameter_max"])/2
+            diameterUS = (
+                neos["estimated_diameter"]["feet"]["estimated_diameter_min"]
+                + neos["estimated_diameter"]["feet"]["estimated_diameter_max"]
+            ) / 2
 
-            approach = neos["close_approach_data"][0] #get the closest approach datas (only takes the first approach, most of times is the only. )
+            approach = neos["close_approach_data"][
+                0
+            ]  # get the closest approach datas (only takes the first approach, most of times is the only. )
 
             if approach["orbiting_body"] == "Earth":
 
-                neo_object = neo(name=neos["name"], 
-                                id=neos["id"], 
-                                date=day,
-                                diameter=diameter, 
-                                speed=float(approach["relative_velocity"]["kilometers_per_hour"]), 
-                                dis=float(approach["miss_distance"]["kilometers"]),
-                                hazard= neos["is_potentially_hazardous_asteroid"])
+                neo_object = neo(
+                    name=neos["name"],
+                    id=neos["id"],
+                    date=day,
+                    diameter=diameter,
+                    speed=float(approach["relative_velocity"]["kilometers_per_hour"]),
+                    dis=float(approach["miss_distance"]["kilometers"]),
+                    hazard=neos["is_potentially_hazardous_asteroid"],
+                )
 
-                neoUS_object = neoUs(name=neos["name"], 
-                                id=neos["id"], 
-                                date=day,
-                                diameter=diameterUS, 
-                                speed=float(approach["relative_velocity"]["miles_per_hour"]), 
-                                dis=float(approach["miss_distance"]["miles"]),
-                                hazard= neos["is_potentially_hazardous_asteroid"])
+                neoUS_object = neoUs(
+                    name=neos["name"],
+                    id=neos["id"],
+                    date=day,
+                    diameter=diameterUS,
+                    speed=float(approach["relative_velocity"]["miles_per_hour"]),
+                    dis=float(approach["miss_distance"]["miles"]),
+                    hazard=neos["is_potentially_hazardous_asteroid"],
+                )
 
                 neo_list.append(neo_object)
 
@@ -125,4 +150,4 @@ def classifier(json_data) -> tuple[list[neo], list[neoUs]]:
 
     print("\n--RESOURCES STORED SUCCESSFULLY--\n")
 
-    return neo_list, neo_list_US #return the lists of neos
+    return neo_list, neo_list_US  # return the lists of neos
