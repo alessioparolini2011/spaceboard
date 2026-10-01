@@ -66,13 +66,13 @@ class neoUs:  # creating the class to save NEOs with US metric
         self.hazard = hazard
 
 
-def neo_req(api, today, yesterday, tomorrow):
+def neo_req(api, start_day, end_day):
 
     try:
 
         request = client.get(
             "neo/rest/v1/feed",
-            params={"start_date": yesterday, "end_date": tomorrow, "api_key": api},
+            params={"start_date": start_day, "end_date": end_day, "api_key": api},
         )
 
         request.raise_for_status()
