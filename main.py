@@ -4,31 +4,24 @@ Welcome to my project, Spaceboard! Is an software designed to visualize space da
 My name is Alessio Parolini, and I am a software developer with a passion for creating innovative solutions.
 """
 
-import os
-
-from dotenv import load_dotenv
-
 from cli import spaceboard
 
 import datetime as dt
 
+from onboard import OnBoard
+
 
 def main():
 
-    load_dotenv()
+    boarding = OnBoard()
 
-    NASA_API_KEY = os.getenv("NASA_API_KEY")
+    NASA_API_KEY = boarding.getapi()
 
-    current_date = dt.date.today()  # get the current data for the reqeust
-
-    today = current_date.isoformat()
-
-    yesterday = (current_date - dt.timedelta(days=1)).isoformat()
-
-    tomorrow = (current_date + dt.timedelta(days=1)).isoformat()
+    dates_id = boarding.getdates(limit=1)
 
     app = spaceboard(
-        api=NASA_API_KEY, today=today, yesterday=yesterday, tomorrow=tomorrow
+        api=NASA_API_KEY,
+        dates_id=dates_id,
     )
 
     app.run()
