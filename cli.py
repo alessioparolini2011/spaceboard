@@ -1,3 +1,12 @@
+"""
+cli.py
+This file uses Textual for create and manage an interactive CLI.
+"""
+
+from rich.align import Align
+
+from rich.text import Text
+
 from textual.app import App, ComposeResult
 
 from textual.widgets import Footer, Label, DataTable, ContentSwitcher
@@ -6,68 +15,89 @@ from textual.containers import Center
 
 from textual import work
 
-from client import neo_req, neo, neoUs
+from client import neo_req
+
+
+class MiddleTxt(Align):
+    def __init__(self, text: str, height: int = 3):
+        super().__init__(
+            Text.from_markup(text, justify="center"),
+            vertical="middle",
+            height=height,
+        )
 
 
 class spaceboard(App):
 
-    def __init__(self, api, today, yesterday, tomorrow, *args, **kwargs):
+    BINDINGS = [
+        ("e", "exit", "Close the program"),
+        ("c", "change_units", "Units: (Metric/Imperial)"),
+        ("left", "move_prev", "Go left (use left arrow key)"),
+        ("right", "move_next", "Go right (use right arrow key)"),
+    ]
+
+    CSS_PATH = "spaceboard.tcss"
+
+    COLUMNS_METRIC = [
+        "[b]NAME[/b]",
+        "[b]ID[/b]",
+        "[b]DIAMETER (m)[/b]",
+        "[b]SPEED (Km/h)[/b]",
+        "[b]DISTANCE (Km)[/b]",
+        "[b]POTENTIALLY HAZARDOUS?[/b]",
+    ]
+
+    COLUMNS_IMPERIAL = [
+        "[b]NAME[/b]",
+        "[b]ID[/b]",
+        "[b]DIAMETER (ft)[/b]",
+        "[b]SPEED (mph)[/b]",
+        "[b]DISTANCE (mi)[/b]",
+        "[b]POTENTIALLY HAZARDOUS?[/b]",
+    ]
+
+    def __init__(self, api: str, dates_id: dict, *args, **kwargs):
 
         super().__init__(*args, **kwargs)
 
         self.api = api
 
-        self.td = today
+        self.dates_id = dates_id
 
-        self.yd = yesterday
+        self.ordered_days_list = sorted(
+            self.dates_id.keys(), key=lambda k: self.dates_id[k][0][0]
+        )
 
-        self.tm = tomorrow
+        self.day_index = self.ordered_days_list.index("cd")
 
-        self.list: neo = []
+        self.neo_by_unit = {"metric": [], "imperial": []}
 
-        self.list_US: neoUs = []
+        self.is_metric = True
 
-        self.state = True
+    def make_table(self, tid: str) -> DataTable:
 
-        self.days = ["td", "tm", "yd"]
+        table = DataTable(
+            classes="neotab",
+            id=tid,
+            cursor_type="row",
+            zebra_stripes=True,
+            cell_padding=3,
+        )
 
-    BINDINGS = [
-        ("e", "exit", "Close the program"),
-        ("c", "change_units", "Units: (Metric/US)"),
-    ]
+        return table
 
-    CSS = """
-    #title {
-    color: #00FFFF;
-    text-align: center;
-    height: auto; 
-    width: auto;}
-
-    #des {
-    color: #F0F8FF;
-    text-align: center;
-    height: auto;
-    width:auto;
-    margin: 1;
-    border: round #F0F8FF;
-    padding: 0 2;
-    }
-
-    ContentSwitcher {
-    
-    width: 100%;
-    height: auto;
-    margin: 2 2;
-
-    }
-
-    .neotab {
-    width: 100%;
-    height: auto;
-    color: #F0F8FF;
-    background: #191970;
-    }
-    """
+    def _add_new_row(self, table: DataTable, neo_obj):
+        table.add_row(
+            MiddleTxt(neo_obj.name),
+            MiddleTxt(neo_obj.id),
+            MiddleTxt(f"{neo_obj.diam:,.3f}"),
+            MiddleTxt(f"{neo_obj.speed:,.3f}"),
+            MiddleTxt(f"{neo_obj.dis:,.3f}"),
+            MiddleTxt(
+                ("[bold red]YES! ⚠️[/]" if neo_obj.hazard else "[bold green]NO[/]")
+            ),
+            height=3,
+        )
 
     def compose(self) -> ComposeResult:
 
@@ -97,67 +127,13 @@ class spaceboard(App):
                 id="des",
             )
 
-        td_table = DataTable(
-            classes="neotab",
-            id="tdt",
-            cursor_type="row",
-            zebra_stripes=True,
-            cell_padding=3,
-        )
+        with ContentSwitcher(initial=list(self.dates_id.keys())[0]):
 
-        td_table_US = DataTable(
-            classes="neotab",
-            id="tdt_US",
-            cursor_type="row",
-            zebra_stripes=True,
-            cell_padding=3,
-        )
+            for day_id in self.dates_id.keys():
 
-        yd_table = DataTable(
-            classes="neotab",
-            id="ydt",
-            cursor_type="row",
-            zebra_stripes=True,
-            cell_padding=3,
-        )
+                yield self.make_table(day_id)
 
-        yd_table_US = DataTable(
-            classes="neotab",
-            id="ydt_US",
-            cursor_type="row",
-            zebra_stripes=True,
-            cell_padding=3,
-        )
-
-        tm_table = DataTable(
-            classes="neotab",
-            id="tmt",
-            cursor_type="row",
-            zebra_stripes=True,
-            cell_padding=3,
-        )
-
-        tm_table_US = DataTable(
-            classes="neotab",
-            id="tmt_US",
-            cursor_type="row",
-            zebra_stripes=True,
-            cell_padding=3,
-        )
-
-        with ContentSwitcher(initial="tdt"):
-
-            yield td_table
-
-            yield td_table_US
-
-            yield yd_table
-
-            yield yd_table_US
-
-            yield tm_table
-
-            yield tm_table_US
+                yield self.make_table(f"{day_id}_imperial")
 
         yield Footer(show_command_palette=False)
 
@@ -168,99 +144,53 @@ class spaceboard(App):
     @work(thread=True)
     def data_update(self, api) -> None:
 
-        self.neo_list, self.neo_list_US = neo_req(
-            api, today=self.td, yesterday=self.yd, tomorrow=self.tm
+        limit_days = (list(self.dates_id.keys())[-2], list(self.dates_id.keys())[-1])
+
+        metric, imperial = neo_req(
+            api,
+            start_day=self.dates_id[limit_days[0]][0][0],
+            end_day=self.dates_id[limit_days[1]][0][0],
         )
+
+        if metric and imperial:
+
+            self.call_from_thread(self.notify, "Datas achived successfully!")
+
+        self.neo_by_unit["metric"] = metric
+
+        self.neo_by_unit["imperial"] = imperial
 
         self.call_from_thread(self._store_data)
 
     def _store_data(self):
 
-        tdt = self.query_one("#tdt", DataTable)
-
-        tdt_US = self.query_one("#tdt_US", DataTable)
-
-        ydt = self.query_one("#ydt", DataTable)
-
-        ydt_US = self.query_one("#ydt_US", DataTable)
-
-        tmt = self.query_one("#tmt", DataTable)
-
-        tmt_US = self.query_one("#tmt_US", DataTable)
-
-        day_tables = [
-            (
-                self.td,
-                tdt,
-                tdt_US,
-            ),
-            (
-                self.yd,
-                ydt,
-                ydt_US,
-            ),
-            (
-                self.tm,
-                tmt,
-                tmt_US,
-            ),
-        ]
-
-        for target_date, table_metric, table_US in day_tables:
-
-            table_metric.add_columns(
-                "[b]NAME[b/]",
-                "[b]ID[b/]",
-                "[b]DIAMETER (m)[b/]",
-                "[b]SPEED (Km/h)[b/]",
-                "[b]DISTANCE (Km)[b/]",
-                "[b]POTENTIALLY HAZARDOUS?[b/]",
+        for key in self.dates_id:
+            self.dates_id[key][1] = (
+                self.query_one(f"#{key}", DataTable),
+                self.query_one(f"#{key}_imperial", DataTable),
             )
 
-            table_US.add_columns(
-                "[b]NAME[b/]",
-                "[b]ID[b/]",
-                "[b]DIAMETER (ft)[b/]",
-                "[b]SPEED (mph)[b/]",
-                "[b]DISTANCE (mi)[b/]",
-                "[b]POTENTIALLY HAZARDOUS?[b/]",
-            )
+        for (target_date,), (table_metric, table_imperial) in self.dates_id.values():
 
-            for neo_object in self.neo_list:
+            table_metric.add_columns(*self.COLUMNS_METRIC)
 
-                if neo_object.date == target_date:
+            table_imperial.add_columns(*self.COLUMNS_IMPERIAL)
 
-                    table_metric.add_row(
-                        f"\n{neo_object.name}",
-                        f"\n{neo_object.id}",
-                        f"\n{neo_object.diam:,.3f}",
-                        f"\n{neo_object.speed:,.3f}",
-                        f"\n{neo_object.dis:,.3f}",
-                        (
-                            "\n[red]YES!​⚠️​[/red]"
-                            if neo_object.hazard
-                            else "\n[green]NO[/green]"
-                        ),
-                        height=3,
-                    )
+            neos_metric = [
+                n for n in self.neo_by_unit["metric"] if n.date == target_date
+            ]
 
-            for neo_object_US in self.neo_list_US:
+            neos_imperial = [
+                n for n in self.neo_by_unit["imperial"] if n.date == target_date
+            ]
 
-                if neo_object_US.date == target_date:
+            for neo_m in neos_metric:
 
-                    table_US.add_row(
-                        f"\n{neo_object_US.name}",
-                        f"\n{neo_object_US.id}",
-                        f"\n{neo_object_US.diam:,.3f}",
-                        f"\n{neo_object_US.speed:,.3f}",
-                        f"\n{neo_object_US.dis:,.3f}",
-                        (
-                            "\n[red]YES!​⚠️​[/red]"
-                            if neo_object_US.hazard
-                            else "\n[green]NO[/green]"
-                        ),
-                        height=3,
-                    )
+                self._add_new_row(table_metric, neo_m)
+
+            for neo_i in neos_imperial:
+
+                self._add_new_row(table_imperial, neo_i)
 
         self.notify("Data stored successfully!")
 
@@ -268,18 +198,30 @@ class spaceboard(App):
 
         self.exit()
 
-    def action_change_units(self) -> None:
+    def update_current(self) -> None:
 
         switcher = self.query_one(ContentSwitcher)
 
-        current = switcher.current
+        switcher.current = (
+            self.ordered_days_list[self.day_index]
+            if self.is_metric
+            else f"{self.ordered_days_list[self.day_index]}_imperial"
+        )
 
-        if current.endswith("_US"):
+    def action_change_units(self) -> None:
 
-            new_t = current.replace("_US", "")
+        self.is_metric = not self.is_metric
 
-        else:
+        self.update_current()
 
-            new_t = f"{current}_US"
+    def action_move_next(self) -> None:
 
-        switcher.current = new_t
+        self.day_index = (self.day_index + 1) % len(self.ordered_days_list)
+
+        self.update_current()
+
+    def action_move_prev(self) -> None:
+
+        self.day_index = (self.day_index - 1) % len(self.ordered_days_list)
+
+        self.update_current()
