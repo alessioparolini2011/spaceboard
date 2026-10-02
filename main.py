@@ -6,8 +6,6 @@ My name is Alessio Parolini, and I am a software developer with a passion for cr
 
 from cli import spaceboard
 
-import datetime as dt
-
 from onboard import OnBoard
 
 
