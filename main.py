@@ -17,7 +17,7 @@ def main():
 
     NASA_API_KEY = boarding.getapi()
 
-    dates_id = boarding.getdates(limit=1)
+    dates_id = boarding.getdates(limit=2)
 
     app = spaceboard(
         api=NASA_API_KEY,
