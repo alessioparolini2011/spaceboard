@@ -47,13 +47,13 @@ class OnBoard:
 
         cd = dt.date.today()
 
-        dates_id = {"cd": [(cd.isoformat(),), ()]}
+        dates_id = {"cd": [(cd,), ()]}
 
         for i in range(1, limit + 1):
 
-            pd_id = (cd - dt.timedelta(days=i)).isoformat()
+            pd_id = cd - dt.timedelta(days=i)
 
-            nd_id = (cd + dt.timedelta(days=i)).isoformat()
+            nd_id = cd + dt.timedelta(days=i)
 
             dates_id.update({f"pd{i}": [(pd_id,), ()], f"nd{i}": [(nd_id,), ()]})
 
