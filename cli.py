@@ -157,8 +157,7 @@ class spaceboard(App):
         with Center():
 
             description = Label(
-                """This is [b]spaceboard[/b], a space weather dashboard to visualize NEOs (Near Earth Objects) for a 5-days window (current day ande the 2 next/previous).\n
-                It was created by Alessio Parolini in September 2026 for Hack Club X NASA event [b]Stardance[/b].""",
+                "This is [b]spaceboard[/b], a very simple space weather dashboard to visualize NEOs (Near Earth Objects) data for a 5-days window (current day and the 2 next/previous).\nIt was created by Alessio Parolini in September 2026 for Hack Club X NASA event [b]Stardance[/b].",
                 id="des",
             )
 

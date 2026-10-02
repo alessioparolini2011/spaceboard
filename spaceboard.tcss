@@ -20,13 +20,13 @@ Vertical {
 
 #des {
     color: #F0F8FF;
-    text-align: center;
+    text-align: left;
     height: auto;
-    width:auto;
-    margin: 1;
+    width: 100%;
+    margin: 1 2 0 2;
     border: round #F0F8FF;
     border-title-align: center;
-    padding: 0 2;
+    padding: 0 1;
     }
 
 .neoTab {
