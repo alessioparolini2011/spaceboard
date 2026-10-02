@@ -1,0 +1,43 @@
+Screen {
+    scrollbar-gutter: stable;
+
+}
+ContentSwitcher {
+    width: 100%;
+    height: auto;
+    margin: 2 2;
+    }
+
+Vertical {
+    height: auto;
+}
+
+#title {
+    color: #00FFFF;
+    text-align: center;
+    height: auto; 
+    width: auto;}
+
+#des {
+    color: #F0F8FF;
+    text-align: center;
+    height: auto;
+    width:auto;
+    margin: 1;
+    border: round #F0F8FF;
+    border-title-align: center;
+    padding: 0 2;
+    }
+
+.neoTab {
+    width: 100%;
+    height: auto;
+    color: #F0F8FF;
+    background: #191970;
+    }   
+
+.tableDateLabel {
+    width: auto;
+    color: #00FFFF;   
+    padding: 0 1 0 1
+    }
