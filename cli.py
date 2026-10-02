@@ -11,9 +11,13 @@ from textual.app import App, ComposeResult
 
 from textual.widgets import Footer, Label, DataTable, ContentSwitcher
 
-from textual.containers import Center
+from textual.containers import Center, Vertical
+
+from textual.binding import Binding
 
 from textual import work
+
+from datetime import datetime as dt
 
 from client import neo_req
 
@@ -30,10 +34,34 @@ class MiddleTxt(Align):
 class spaceboard(App):
 
     BINDINGS = [
-        ("e", "exit", "Close the program"),
-        ("c", "change_units", "Units: (Metric/Imperial)"),
-        ("left", "move_prev", "Go left (use left arrow key)"),
-        ("right", "move_next", "Go right (use right arrow key)"),
+        Binding(
+            "left",
+            "go_left",
+            "Go left (use left arrow key)",
+            show=True,
+            priority=True,
+        ),
+        Binding(
+            "right",
+            "go_right",
+            "Go right (use right arrow key)",
+            show=True,
+            priority=True,
+        ),
+        Binding(
+            "c",
+            "toggle_units",
+            "Units: (Metric/Imperial)",
+            show=True,
+            priority=True,
+        ),
+        Binding(
+            "q",
+            "quit",
+            "Close the program",
+            show=True,
+            priority=True,
+        ),
     ]
 
     CSS_PATH = "spaceboard.tcss"
@@ -74,17 +102,23 @@ class spaceboard(App):
 
         self.is_metric = True
 
-    def make_table(self, tid: str) -> DataTable:
+    def make_table_group(self, tid: str) -> Vertical:
+
+        label = Label("", id=f"{tid}_label", classes="tableDateLabel")
 
         table = DataTable(
-            classes="neotab",
-            id=tid,
+            classes="neoTab",
+            id=f"{tid}_table",
             cursor_type="row",
             zebra_stripes=True,
             cell_padding=3,
         )
 
-        return table
+        return Vertical(
+            label,
+            table,
+            id=tid,
+        )
 
     def _add_new_row(self, table: DataTable, neo_obj):
         table.add_row(
@@ -122,22 +156,30 @@ class spaceboard(App):
 
         with Center():
 
-            yield Label(
+            description = Label(
                 "This is [b]spaceboard[/b], a space weather dashboard to visualize NEO (Near Earth Objects) for current, previous and next day.\nIt was created by Alessio Parolini in September 2026 for Hack Club X NASA event [b]Stardance[/b].",
                 id="des",
             )
 
-        with ContentSwitcher(initial=list(self.dates_id.keys())[0]):
+            description.border_title = "What's this?"
+
+            yield description
+
+        with ContentSwitcher(
+            initial=list(self.dates_id.keys())[0], id="table_switcher"
+        ):
 
             for day_id in self.dates_id.keys():
 
-                yield self.make_table(day_id)
+                yield self.make_table_group(day_id)
 
-                yield self.make_table(f"{day_id}_imperial")
+                yield self.make_table_group(f"{day_id}_imperial")
 
         yield Footer(show_command_palette=False)
 
     def on_mount(self) -> None:
+
+        self.switcher = self.query_one("#table_switcher", ContentSwitcher)
 
         self.data_update(self.api)
 
@@ -164,63 +206,100 @@ class spaceboard(App):
 
     def _store_data(self):
 
+        max_rows = 0
+
         for key in self.dates_id:
             self.dates_id[key][1] = (
-                self.query_one(f"#{key}", DataTable),
-                self.query_one(f"#{key}_imperial", DataTable),
+                self.query_one(f"#{key}_table", DataTable),
+                self.query_one(f"#{key}_imperial_table", DataTable),
+                self.query_one(f"#{key}_label"),
+                self.query_one(f"#{key}_imperial_label"),
             )
 
-        for (target_date,), (table_metric, table_imperial) in self.dates_id.values():
+        for (target_date,), (
+            table_metric,
+            table_imperial,
+            label_metric,
+            label_imperial,
+        ) in self.dates_id.values():
+
+            label_metric.styles.border = "round", "#F0F8FF"
+
+            label_metric.update(target_date.strftime("%A %d %B %Y"))
+
+            label_imperial.styles.border = "round", "#F0F8FF"
+
+            label_imperial.update(target_date.strftime("%A %d %B %Y"))
 
             table_metric.add_columns(*self.COLUMNS_METRIC)
 
             table_imperial.add_columns(*self.COLUMNS_IMPERIAL)
 
             neos_metric = [
-                n for n in self.neo_by_unit["metric"] if n.date == target_date
+                n
+                for n in self.neo_by_unit["metric"]
+                if n.date == target_date.isoformat()
             ]
 
             neos_imperial = [
-                n for n in self.neo_by_unit["imperial"] if n.date == target_date
+                n
+                for n in self.neo_by_unit["imperial"]
+                if n.date == target_date.isoformat()
             ]
 
             for neo_m in neos_metric:
 
                 self._add_new_row(table_metric, neo_m)
 
+                max_rows = (
+                    table_metric.row_count
+                    if table_metric.row_count > max_rows
+                    else max_rows
+                )
+
             for neo_i in neos_imperial:
 
                 self._add_new_row(table_imperial, neo_i)
 
+                max_rows = (
+                    table_imperial.row_count
+                    if table_imperial.row_count > max_rows
+                    else max_rows
+                )
+
         self.notify("Data stored successfully!")
 
-    def action_exit(self) -> None:
+        final_height = 4 + (
+            max_rows * 3
+        )  # this value will be used as the ContentSwitcher height, otherwise when you get a shorter table the vertical scroll reset. +4 is for header and label
 
-        self.exit()
+        self.switcher.styles.height = final_height
 
     def update_current(self) -> None:
 
-        switcher = self.query_one(ContentSwitcher)
-
-        switcher.current = (
+        self.switcher.current = (
             self.ordered_days_list[self.day_index]
             if self.is_metric
             else f"{self.ordered_days_list[self.day_index]}_imperial"
         )
 
-    def action_change_units(self) -> None:
+    def action_quit(self) -> None:
+
+        self.exit()
+
+    def action_toggle_units(self) -> None:
 
         self.is_metric = not self.is_metric
 
         self.update_current()
 
-    def action_move_next(self) -> None:
+    def action_go_right(self) -> None:
 
         self.day_index = (self.day_index + 1) % len(self.ordered_days_list)
 
         self.update_current()
 
-    def action_move_prev(self) -> None:
+    def action_go_left(self) -> None:
 
         self.day_index = (self.day_index - 1) % len(self.ordered_days_list)
 
