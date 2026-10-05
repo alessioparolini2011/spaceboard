@@ -78,20 +78,33 @@ def neo_req(api, start_day, end_day):
         request.raise_for_status()
 
     except hx.HTTPStatusError as e:
-
-        raise NasaError(f"Nasa Server Error: {e.response.status_code}")
+        code = e.response.status_code
+        if code in (401, 403):
+            raise NasaError(
+                f"Nasa Server Error: {code}. Check your API key in the .env file. Is it correct? If you're not sure, [bold]delete it and restart the file - you'll be help to get a right one![/]"
+            ) from e
+        elif code == 429:
+            raise NasaError(
+                f"Nasa Server Error: {code}. Rate limit exceeded. Use a personal API key."
+            ) from e
+        elif 500 <= code < 600:
+            raise NasaError(
+                f"Nasa Server Error: {code}. NASA server is down, try later."
+            ) from e
+        else:
+            raise NasaError(f"Nasa Server Error: {code}") from e
 
     except hx.TimeoutException as e:
 
-        raise NasaError("Timeout expired.")
+        raise NasaError("Timeout expired.") from e
 
     except hx.ConnectError as e:
 
-        raise NasaError(f"No connection with NASA Server: {e}")
+        raise NasaError(f"No connection with NASA Server: {e}") from e
 
     except hx.RequestError as e:
 
-        raise NasaError(f"Generic network error: {e}")
+        raise NasaError(f"Generic network error: {e}") from e
 
     data = request.json()
 
