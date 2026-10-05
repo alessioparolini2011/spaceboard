@@ -11,15 +11,56 @@ from textual.app import App, ComposeResult
 
 from textual.widgets import Footer, Label, DataTable, ContentSwitcher
 
+from textual.screen import ModalScreen
+
 from textual.containers import Center, Vertical
 
 from textual.binding import Binding
 
 from textual import work
 
-from datetime import datetime as dt
+from client import neo_req, NasaError
 
-from client import neo_req
+
+class ErrorScreen(
+    ModalScreen
+):  # creating a class (from ModalScreen) to visualize errors
+
+    BINDINGS = [("e", "escape", "Close the window")]
+
+    CSS_PATH = "error_screen.tcss"
+
+    def __init__(
+        self, name=None, id=None, classes=None, *, message: str = "Unknown Error!"
+    ):
+        super().__init__(name, id, classes)
+
+        self.message = message
+
+    def compose(self):
+
+        with Center():
+
+            with Vertical():
+
+                yield Label(
+                    """[red]                                   
+    ###### #####  #####   ####  #####  
+    #      #    # #    # #    # #    # 
+    #####  #    # #    # #    # #    # 
+    #      #####  #####  #    # #####  
+    #      #   #  #   #  #    # #   #  
+    ###### #    # #    #  ####  #    # [/red]""",
+                    id="bigError",
+                )
+
+                yield Label(self.message, id="errorMessage", markup=True)
+
+                yield Label("(Press 'e' to exit)", id="exitMessage")
+
+    def action_escape(self):
+
+        self.dismiss()
 
 
 class MiddleTxt(Align):
@@ -31,7 +72,7 @@ class MiddleTxt(Align):
         )
 
 
-class spaceboard(App):
+class Spaceboard(App):
 
     BINDINGS = [
         Binding(
@@ -188,21 +229,33 @@ class spaceboard(App):
 
         limit_days = (list(self.dates_id.keys())[-2], list(self.dates_id.keys())[-1])
 
-        metric, imperial = neo_req(
-            api,
-            start_day=self.dates_id[limit_days[0]][0][0],
-            end_day=self.dates_id[limit_days[1]][0][0],
-        )
+        try:
+
+            metric, imperial = neo_req(
+                api,
+                start_day=self.dates_id[limit_days[0]][0][0],
+                end_day=self.dates_id[limit_days[1]][0][0],
+            )
+
+        except NasaError as e:
+
+            self.call_from_thread(self.push_screen, ErrorScreen(message=str(e)))
+
+            return
 
         if metric and imperial:
 
             self.call_from_thread(self.notify, "Datas achived successfully!")
 
-        self.neo_by_unit["metric"] = metric
+            self.neo_by_unit["metric"] = metric
 
-        self.neo_by_unit["imperial"] = imperial
+            self.neo_by_unit["imperial"] = imperial
 
-        self.call_from_thread(self._store_data)
+            self.call_from_thread(self._store_data)
+
+        else:
+
+            self.exit()
 
     def _store_data(self):
 

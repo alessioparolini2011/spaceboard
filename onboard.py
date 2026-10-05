@@ -21,7 +21,7 @@ class OnBoard:
 
         NASA_API_KEY = os.getenv("NASA_API_KEY")
 
-        if NASA_API_KEY:
+        if NASA_API_KEY.strip():
 
             return NASA_API_KEY
 
@@ -37,7 +37,7 @@ class OnBoard:
 
             while not NASA_API_KEY:
 
-                NASA_API_KEY = self.console.input("[blue]->[/] ")
+                NASA_API_KEY = self.console.input("\n[blue]->[/] ")
 
             set_key(".env", "NASA_API_KEY", NASA_API_KEY)
 

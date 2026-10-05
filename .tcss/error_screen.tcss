@@ -1,0 +1,28 @@
+ErrorScreen {
+    align: center middle;
+}
+
+Center {
+    width: auto;
+    height: auto;
+    align: center middle
+
+}
+
+Vertical {
+    align: center middle;
+}
+
+#bigError {
+    text-align: center;
+    margin: 1
+}
+
+#errorMessage {
+    margin: 1;
+    color: #F0F8FF
+}
+
+#exitMessage {
+    margin: 1;
+}

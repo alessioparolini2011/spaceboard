@@ -4,7 +4,7 @@ Welcome to my project, Spaceboard! Is an software designed to visualize space da
 My name is Alessio Parolini, and I am a software developer with a passion for creating innovative solutions.
 """
 
-from tui_dashboard import spaceboard
+from tui_dashboard import Spaceboard
 
 from onboard import OnBoard
 
@@ -17,7 +17,7 @@ def main():
 
     dates_id = boarding.getdates(limit=2)
 
-    app = spaceboard(
+    app = Spaceboard(
         api=NASA_API_KEY,
         dates_id=dates_id,
     )
