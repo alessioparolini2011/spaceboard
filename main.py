@@ -4,7 +4,7 @@ Welcome to my project, Spaceboard! Is an software designed to visualize space da
 My name is Alessio Parolini, and I am a software developer with a passion for creating innovative solutions.
 """
 
-from cli import spaceboard
+from tui_dashboard import spaceboard
 
 from onboard import OnBoard
 
