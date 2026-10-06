@@ -19,7 +19,7 @@ from textual.binding import Binding
 
 from textual import work
 
-from client import neo_req, NasaError
+from client import fetch_neo_data, NasaError
 
 
 class ErrorScreen(
@@ -28,7 +28,7 @@ class ErrorScreen(
 
     BINDINGS = [("e", "escape", "Close the window")]
 
-    CSS_PATH = "error_screen.tcss"
+    CSS_PATH = ".tcss/error_screen.tcss"
 
     def __init__(
         self, name=None, id=None, classes=None, *, message: str = "Unknown Error!"
@@ -105,7 +105,7 @@ class Spaceboard(App):
         ),
     ]
 
-    CSS_PATH = "spaceboard.tcss"
+    CSS_PATH = ".tcss/spaceboard.tcss"
 
     COLUMNS_METRIC = [
         "[b]NAME[/b]",
@@ -163,11 +163,11 @@ class Spaceboard(App):
 
     def _add_new_row(self, table: DataTable, neo_obj):
         table.add_row(
-            MiddleTxt(neo_obj.name),
+            MiddleTxt(f"[link={neo_obj.link}]{neo_obj.name}[/link]"),
             MiddleTxt(neo_obj.id),
-            MiddleTxt(f"{neo_obj.diam:,.3f}"),
+            MiddleTxt(f"{neo_obj.diameter:,.3f}"),
             MiddleTxt(f"{neo_obj.speed:,.3f}"),
-            MiddleTxt(f"{neo_obj.dis:,.3f}"),
+            MiddleTxt(f"{neo_obj.distance:,.3f}"),
             MiddleTxt(
                 ("[bold red]YES! ⚠️[/]" if neo_obj.hazard else "[bold green]NO[/]")
             ),
@@ -231,10 +231,10 @@ class Spaceboard(App):
 
         try:
 
-            metric, imperial = neo_req(
-                api,
-                start_day=self.dates_id[limit_days[0]][0][0],
-                end_day=self.dates_id[limit_days[1]][0][0],
+            metric, imperial = fetch_neo_data(
+                api_key=api,
+                start_date=self.dates_id[limit_days[0]][0][0],
+                end_date=self.dates_id[limit_days[1]][0][0],
             )
 
         except NasaError as e:
@@ -252,10 +252,6 @@ class Spaceboard(App):
             self.neo_by_unit["imperial"] = imperial
 
             self.call_from_thread(self._store_data)
-
-        else:
-
-            self.exit()
 
     def _store_data(self):
 
