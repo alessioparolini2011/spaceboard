@@ -19,7 +19,7 @@ class OnBoard:
 
         load_dotenv()
 
-        NASA_API_KEY = os.getenv("NASA_API_KEY")
+        NASA_API_KEY: str = os.getenv("NASA_API_KEY")
 
         if NASA_API_KEY.strip():
 
