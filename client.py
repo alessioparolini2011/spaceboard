@@ -1,166 +1,188 @@
+"""
+NASA NEO API client for Spaceboard
+
+This module provides utilities to fetch and process Near Earth Object (NEO) data from NASA API, converting it it into structured Python objects.
+"""
+
 import httpx as hx
+from dataclasses import dataclass
+import json
 
-import json as js
+# HTTP client configuration
 
-client = hx.Client(timeout=30.0, base_url="https://api.nasa.gov")
+_client = hx.Client(timeout=30.0, base_url="https://api.nasa.gov")
 
 
 class NasaError(Exception):
+    """Custom exception for NASA API errors"""
 
     pass
 
 
-class neo:  # creating the class to saves NEOs with
+@dataclass
+class Neo:
+    """
+    Represents a NEO with his data
 
-    def __init__(
-        self,
-        name: str,
-        id: str,
-        date: str,
-        diameter: float,
-        speed: float,
-        dis: float,
-        hazard: bool,
-    ):
+    Attributes:
+        name: object name
+        id: NASA internal ID
+        data: Date to closest approach (ISO format)
+        diameter: average diameter in specified units
+        speed: relative velocity in specified units
+        distance: miss distance in specified units
+        hazard: whether it's potentially hazardous
+    """
 
-        self.name = name
+    name: str
 
-        self.id = id
+    id: str
 
-        self.date = date
+    link: str
 
-        self.diam = diameter
+    date: str
 
-        self.speed = speed
+    diameter: float
 
-        self.dis = dis
+    speed: float
 
-        self.hazard = hazard
+    distance: float
 
-
-class neoUs:  # creating the class to save NEOs with US metric
-
-    def __init__(
-        self,
-        name: str,
-        id: str,
-        date: str,
-        diameter: float,
-        speed: float,
-        dis: float,
-        hazard: bool,
-    ):
-
-        self.name = name
-
-        self.id = id
-
-        self.date = date
-
-        self.diam = diameter
-
-        self.speed = speed
-
-        self.dis = dis
-
-        self.hazard = hazard
+    hazard: bool
 
 
-def neo_req(api, start_day, end_day):
+def fetch_neo_data(
+    api_key: str, start_date: str, end_date: str
+) -> tuple[list[Neo], list[Neo]]:
+    """
+    Fetch NEO data from NASA API and return both metric and imperial units
+
+    Args:
+        api_key: NASA API key
+        start_date: Start date (YYYY-MM-DD)
+        end_date: End date (YYYY-MM-DD)
+
+    Returns:
+        tuple of (metric_neos, imperial_neos)
+
+    Raises:
+        NasaError: If API request fails
+    """
 
     try:
 
-        request = client.get(
+        response = _client.get(
             "neo/rest/v1/feed",
-            params={"start_date": start_day, "end_date": end_day, "api_key": api},
+            params={"start_date": start_date, "end_date": end_date, "api_key": api_key},
         )
 
-        request.raise_for_status()
+        response.raise_for_status()
 
     except hx.HTTPStatusError as e:
+
         code = e.response.status_code
+
         if code in (401, 403):
+
             raise NasaError(
-                f"Nasa Server Error: {code}. Check your API key in the .env file. Is it correct? If you're not sure, [bold]delete it and restart the file - you'll be help to get a right one![/]"
+                f"NASA Server error: {code}. There's an error with your API key."
             ) from e
+
         elif code == 429:
+
             raise NasaError(
-                f"Nasa Server Error: {code}. Rate limit exceeded. Use a personal API key."
+                f"NASA Server error: {code}. You hit the rate limit. If you're using a DEMO_KEY (with only 50 requets for day), change to a personal one.\nIf instead you're using a personal one, you've to wait for an hour."
             ) from e
-        elif 500 <= code < 600:
+
+        elif 500 <= code <= 600:
+
             raise NasaError(
-                f"Nasa Server Error: {code}. NASA server is down, try later."
+                f"NASA Server error: {code}. NASA server is down, try later."
             ) from e
-        else:
-            raise NasaError(f"Nasa Server Error: {code}") from e
 
     except hx.TimeoutException as e:
 
-        raise NasaError("Timeout expired.") from e
+        raise NasaError(
+            f"Timeout expired. Check your connection, maybe is too slow. Error: {e}"
+        )
 
     except hx.ConnectError as e:
 
-        raise NasaError(f"No connection with NASA Server: {e}") from e
+        raise NasaError(f"You've got no Internet connection! Error: {e}")
 
     except hx.RequestError as e:
 
-        raise NasaError(f"Generic network error: {e}") from e
+        raise NasaError(f"Generic network error: {e}")
 
-    data = request.json()
+    neo_data = response.json()
 
-    return classifier(json_data=data)
+    return _parse_neo_response(data=neo_data)
 
 
-def classifier(json_data) -> tuple[list[neo], list[neoUs]]:
+def _parse_neo_response(data: dict) -> tuple[list[Neo], list[Neo]]:
+    """
+    Parse NASA API response and convert to Neo objects in both metric and imperial units
 
-    neo_list: neo = []  # to save neos with standard metric
+    Args:
 
-    neo_list_US: neoUs = []  # to save neos with US metric
+        data: the JSON from the NASA API
 
-    for day, neos_list in json_data["near_earth_objects"].items():
+    Returns:
 
-        for neos in neos_list:
+        a tuple with two lists, one for NEO in metric and one for NEO in imperial
+    """
 
-            diameter = (
-                neos["estimated_diameter"]["meters"]["estimated_diameter_min"]
-                + neos["estimated_diameter"]["meters"]["estimated_diameter_max"]
+    metric_neos: Neo = []
+
+    imperial_neos: Neo = []
+
+    for date_str, objects in data["near_earth_objects"].items():
+
+        for obj in objects:
+
+            # does some operations for get special datas (average extimated diameter and the data of the closest approach)
+
+            diameter_metric = (
+                obj["estimated_diameter"]["meters"]["estimated_diameter_min"]
+                + obj["estimated_diameter"]["meters"]["estimated_diameter_max"]
             ) / 2
 
-            diameterUS = (
-                neos["estimated_diameter"]["feet"]["estimated_diameter_min"]
-                + neos["estimated_diameter"]["feet"]["estimated_diameter_max"]
+            diameter_imperial = (
+                obj["estimated_diameter"]["feet"]["estimated_diameter_min"]
+                + obj["estimated_diameter"]["feet"]["estimated_diameter_max"]
             ) / 2
 
-            approach = neos["close_approach_data"][
-                0
-            ]  # get the closest approach datas (only takes the first approach, most of times is the only. )
+            approach = obj["close_approach_data"][0]  # get the closest approach datas
 
-            if approach["orbiting_body"] == "Earth":
+            if (
+                approach["orbiting_body"] != "Earth"
+            ):  # get the data only if the NEO pass near Earth
 
-                neo_object = neo(
-                    name=neos["name"],
-                    id=neos["id"],
-                    date=day,
-                    diameter=diameter,
-                    speed=float(approach["relative_velocity"]["kilometers_per_hour"]),
-                    dis=float(approach["miss_distance"]["kilometers"]),
-                    hazard=neos["is_potentially_hazardous_asteroid"],
-                )
+                continue
 
-                neoUS_object = neoUs(
-                    name=neos["name"],
-                    id=neos["id"],
-                    date=day,
-                    diameter=diameterUS,
-                    speed=float(approach["relative_velocity"]["miles_per_hour"]),
-                    dis=float(approach["miss_distance"]["miles"]),
-                    hazard=neos["is_potentially_hazardous_asteroid"],
-                )
+            common_attrs = {
+                "name": obj["name"],
+                "id": obj["id"],
+                "link": obj["nasa_jpl_url"],
+                "date": date_str,
+                "hazard": obj["is_potentially_hazardous_asteroid"],
+            }
 
-                neo_list.append(neo_object)
+            neo_metric = Neo(
+                **common_attrs,
+                diameter=diameter_metric,
+                speed=float(approach["relative_velocity"]["kilometers_per_hour"]),
+                distance=float(approach["miss_distance"]["kilometers"]),
+            )
+            metric_neos.append(neo_metric)
 
-                neo_list_US.append(neoUS_object)
+            neo_imperial = Neo(
+                **common_attrs,
+                diameter=diameter_imperial,
+                speed=float(approach["relative_velocity"]["miles_per_hour"]),
+                distance=float(approach["miss_distance"]["miles"]),
+            )
 
-    print("\n--RESOURCES STORED SUCCESSFULLY--\n")
+            imperial_neos.append(neo_imperial)
 
-    return neo_list, neo_list_US  # return the lists of neos
+    return metric_neos, imperial_neos
