@@ -1,7 +1,5 @@
 .venv
 
-.env
-
 neo.json
 
 __pycache__
