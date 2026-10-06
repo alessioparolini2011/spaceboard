@@ -23,6 +23,13 @@ When you run the dashboard, you can see a simple dashboard with a list of NEOs f
 
 ## Installation and use
 
+When you have installed the repo with the command `git clone https://github.com/alessioparolini2011/spaceboard.git`, you can install the dependencies with the command `pip install -r requirements.txt`. Then, you need to create a **`.env`** file in the root of the project and add your **NASA API key** in it. You can get your API key [here](https://api.nasa.gov/). The `.env` file should look like this:
+
+```.env
+NASA_API_KEY="YOUR_API_KEY" #replace YOUR_API_KEY with your actual NASA API key
+```
+
+Then, you can run the dashboard with the command `python main.py`.
 
 ## Software structure
 
