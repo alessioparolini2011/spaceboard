@@ -45,4 +45,4 @@ py-modules = ["main", "client", "onboard", "tui_dashboard"]
 
 [project.scripts]
 
-spaceboard = "main:main"
+spaceboard = "main"
