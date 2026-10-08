@@ -28,7 +28,7 @@ class ErrorScreen(
 
     BINDINGS = [("e", "escape", "Close the window")]
 
-    CSS_PATH = ".tcss/error_screen.tcss"
+    CSS_PATH = "tcss/error_screen.tcss"
 
     def __init__(
         self, name=None, id=None, classes=None, *, message: str = "Unknown Error!"
@@ -105,7 +105,7 @@ class Spaceboard(App):
         ),
     ]
 
-    CSS_PATH = ".tcss/spaceboard.tcss"
+    CSS_PATH = "tcss/spaceboard.tcss"
 
     COLUMNS_METRIC = [
         "[b]NAME[/b]",

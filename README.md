@@ -42,6 +42,8 @@ Once installed, you don't need to type `python main.py` anymore. You can launch 
 spaceboard
 ```
 
+![Spaceboard preview(/assets/sb_preview.gif)]
+
 ## Software structure
 
 The **`main.py`** handles the interaction between **`onboard.py`** (that gets the currents 5-days window and the API key -after checking if it's present in the .env file-), and the **`tui_dashboard.py`**(that creates the dashboard and displays the datas). This one uses a function from **`client.py`** to get the datas from the API. Particularly, this request function has a sub-function to create a object for each NEO, using a different class for the two different metric sistems (imperial and metric). I choose to create 2 different classes, instead of one that used conversion methods to keep the code well-organized and for future improvements.
