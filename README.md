@@ -42,7 +42,7 @@ Once installed, you don't need to type `python main.py` anymore. You can launch 
 spaceboard
 ```
 
-![Spaceboard preview(/assets/sb_preview.gif)]
+![Spaceboard preview](/assets/sb_preview.gif)
 
 ## Software structure
 

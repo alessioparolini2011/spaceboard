@@ -38,7 +38,7 @@ dependencies = [
 Homepage = "https://github.com/alessioparolini2011/spaceboard"
 
 [tool.setuptools]
-packages = ["."]
+py-modules = ["main", "client", "onboard", "tui_dashboard"]
 
 [tool.setuptools.package-data]
 "*" = ["tcss/*.tcss"]
