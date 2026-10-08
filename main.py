@@ -9,7 +9,7 @@ from tui_dashboard import Spaceboard
 from onboard import OnBoard
 
 
-def main():
+def start():
 
     boarding = OnBoard()
 
@@ -27,4 +27,4 @@ def main():
 
 if __name__ == "__main__":
 
-    main()
+    start()
