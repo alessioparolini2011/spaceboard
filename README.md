@@ -27,7 +27,7 @@ When you run the dashboard, you can see a simple dashboard with a list of NEOs f
 
 First, clone the repository and navigate into the project folder:
 ```bash
-git clone https://github.com
+git clone https://github.com/alessioparolini11/spaceboard.git
 cd spaceboard
 ```
 Instead of installing dependencies manually, you can now install Spaceboard as a local package using `pip`. Run this command in your terminal:
