@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spaceboard"
+
+version = "1.0.0"
+
+description = "A simple, open-source and self-hosted TUI dashboard to visualize NASA Near Earth Objects (NEOs) data."
+
+readme = "README.md"
+
+requires-python = ">=3.13"
+
+authors = [
+    { name = "Alessio Parolini", email = "alepar.ap9@gmail.com}
+]
+
+license = { text = "MIT" }
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+    "Environment :: Console",
+]
+
+dependencies = [
+    "httpx>=0.27.0",
+    "python-dotenv>=1.0.0",
+    "rich>=13.0.0",
+    "textual>=0.70.0",
+    "pyfiglet>=1.0.2"
+]
+
+[project.urls]
+Homepage = "https://github.com/alessioparolini2011/spaceboard"
+
+[tool.setuptools]
+packages = ["."]
+
+[tool.setuptools.package-data]
+"*" = ["tcss/*.tcss"]
+
+[project.scripts]
+
+spaceboard = "main:main"
