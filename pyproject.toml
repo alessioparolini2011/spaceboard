@@ -14,7 +14,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 
 authors = [
-    { name = "Alessio Parolini", email = "alepar.ap9@gmail.com}
+    { name = "Alessio Parolini", email = "alepar.ap9@gmail.com"}
 ]
 
 license = { text = "MIT" }
