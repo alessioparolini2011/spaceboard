@@ -37,6 +37,8 @@ class OnBoard:
 
             self.console.print(
                 """[red]There isn't any NASA API key[/]. [bold]You need to get one[/].\n\n
+            [bold]IMPORTANT[/]: if you want to do a fast try, enter "DEMO_KEY". You'll get less requests but it's perfect to a fast look!\n\n
+            Else, you can get a [bold]personal API KEY following[/] this steps:\n
             1. Go to https://api.nasa.gov/.\n
             2. Create your own by entering some data (name and e-mail).\n
             3. Check your inbox (for the e-mail account you used) and look for a NASA message\n
