@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "spaceboard"
 
-version = "1.0.1"
+version = "1.0.2"
 
 keywords = ["space", "dashboard", "tui", "neo"]
 
@@ -39,11 +39,10 @@ dependencies = [
 Homepage = "https://github.com/alessioparolini2011/spaceboard"
 
 [tool.setuptools]
-py-modules = ["main", "client", "onboard", "tui_dashboard"]
+packages = { find = { where = ["src"] } }
 
 [tool.setuptools.package-data]
-"*" = ["tcss/*.tcss"]
+"*" = ["*.tcss"]
 
 [project.scripts]
-
-spaceboard = "src.main:start"
+spaceboard = "main:start"
