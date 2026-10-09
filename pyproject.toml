@@ -7,22 +7,23 @@ name = "spaceboard"
 
 version = "1.0.0"
 
+keywords = ["space", "dashboard", "tui", "neo"]
+
 description = "A simple, open-source and self-hosted TUI dashboard to visualize NASA Near Earth Objects (NEOs) data."
 
 readme = "README.md"
 
 requires-python = ">=3.11"
 
+license = "MIT"
+
 authors = [
     { name = "Alessio Parolini", email = "alepar.ap9@gmail.com"}
 ]
 
-license = { text = "MIT" }
-
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
-    "License :: OSI Approved :: MIT License",
     "Environment :: Console",
 ]
 
