@@ -2,9 +2,13 @@ import os
 
 from dotenv import load_dotenv, set_key
 
+from pathlib import Path
+
 import datetime as dt
 
 from rich.console import Console
+
+ENV_PATH = Path.home() / ".spaceboard_env"
 
 
 class OnBoard:
@@ -17,29 +21,37 @@ class OnBoard:
 
     def getapi(self) -> str:
 
-        load_dotenv()
+        if not ENV_PATH.exists():
+
+            ENV_PATH.touch()
+
+        load_dotenv(dotenv_path=ENV_PATH)
 
         NASA_API_KEY: str = os.getenv("NASA_API_KEY")
 
-        if NASA_API_KEY.strip():
+        if NASA_API_KEY and NASA_API_KEY.strip():
 
             return NASA_API_KEY
 
         else:
 
             self.console.print(
-                """[red]There isn't any NASA API key[/]. [bold]You need to create one[/].\n\n
+                """[red]There isn't any NASA API key[/]. [bold]You need to get one[/].\n\n
             1. Go to https://api.nasa.gov/.\n
             2. Create your own by entering some data (name and e-mail).\n
             3. Check your inbox (for the e-mail account you used) and look for a NASA message\n
             4. Copy the API key and paste it here:"""
             )
 
-            while not NASA_API_KEY:
+            user_input = ""
 
-                NASA_API_KEY = self.console.input("\n[blue]->[/] ")
+            while not user_input.strip():
 
-            set_key(".env", "NASA_API_KEY", NASA_API_KEY)
+                user_input = self.console.input("\n[blue]->[/] ")
+
+            NASA_API_KEY = user_input.strip()
+
+            set_key(ENV_PATH, "NASA_API_KEY", NASA_API_KEY)
 
             return NASA_API_KEY
 

@@ -6,7 +6,6 @@ This module provides utilities to fetch and process Near Earth Object (NEO) data
 
 import httpx as hx
 from dataclasses import dataclass
-import json
 
 # HTTP client configuration
 

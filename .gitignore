@@ -1,5 +1,7 @@
 .venv
 
-neo.json
-
 __pycache__
+
+dist
+
+spaceboard.egg-info

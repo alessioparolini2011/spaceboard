@@ -46,7 +46,11 @@ This is a preview of the dashboard in action:
 
 ## Software structure
 
-The **`main.py`** handles the interaction between **`onboard.py`** (that gets the currents 5-days window and the API key -after checking if it's present in the .env file-), and the **`tui_dashboard.py`**(that creates the dashboard and displays the datas). This one uses a function from **`client.py`** to get the datas from the API. Particularly, this request function has a sub-function to create a object for each NEO, using a different class for the two different metric sistems (imperial and metric). The **`tcss`** directory contains the Textual TCSS files to give the dashboard a better look. There's also a **`.env`** file that will contains the API key. 
+The **`main.py`** handles the interaction between **`onboard.py`** (that gets the currents 5-days window and the API key -after checking if it's present in the .env file-), and the **`tui_dashboard.py`**(that creates the dashboard and displays the datas). 
+This one uses a function from **`client.py`** to get the datas from the API. Particularly, this request function has a sub-function to create a object for each NEO, using a different class for the two different metric sistems (imperial and metric). 
+The **`tcss`** directory contains the Textual TCSS files to give the dashboard a better look. 
+The **`.env`** file is autocreated at the first start of the software.
+The **`assets`** directory contains the logo and the gif preview of the README file.
 
 > [!NOTE]
 > GitHub and Hack Club are two amazing communities for developers. Please, if you want to edit and improve the project, do it in a good way and respect the code of conduct of both communities. Make sure to respect the [Hack Club Code of Conduct](https://hackclub.com/conduct/) and the [GitHub Community Guidelines](https://docs.github.com/en/site-policy/github-terms/github-community-guidelines) before contributing. Make coding a better place for everyone. That said, happy coding!

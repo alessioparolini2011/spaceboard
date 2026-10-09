@@ -1,5 +1,5 @@
 """
-cli.py
+tui_dashboard.py
 This file uses Textual for create and manage an interactive CLI.
 """
 
@@ -19,7 +19,7 @@ from textual.binding import Binding
 
 from textual import work
 
-from client import fetch_neo_data, NasaError
+from spaceboard.client import fetch_neo_data, NasaError
 
 
 class ErrorScreen(
