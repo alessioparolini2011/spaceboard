@@ -22,9 +22,10 @@ from textual import work
 from spaceboard.client import fetch_neo_data, NasaError
 
 
-class ErrorScreen(
-    ModalScreen
-):  # creating a class (from ModalScreen) to visualize errors
+class ErrorScreen(ModalScreen):
+    """
+    Create the screen to visualize errors
+    """
 
     BINDINGS = [("e", "escape", "Close the window")]
 
@@ -64,6 +65,10 @@ class ErrorScreen(
 
 
 class MiddleTxt(Align):
+    """
+    A special class to make the text in the datatables more readable
+    """
+
     def __init__(self, text: str, height: int = 3):
         super().__init__(
             Text.from_markup(text, justify="center"),
@@ -73,6 +78,9 @@ class MiddleTxt(Align):
 
 
 class Spaceboard(App):
+    """
+    Creates and manage the main screen to visualize the dashboard
+    """
 
     BINDINGS = [
         Binding(
@@ -125,11 +133,18 @@ class Spaceboard(App):
         "[b]POTENTIALLY HAZARDOUS?[/b]",
     ]
 
-    def __init__(self, api: str, dates_id: dict, *args, **kwargs):
+    def __init__(self, api_key: str, dates_id: dict, *args, **kwargs):
+        """
+        Arguements:
+
+            api_key = the API key from the .env_spaceboard
+
+            dates_id = the dictionary from onboard.py to store the datatables in the right day
+        """
 
         super().__init__(*args, **kwargs)
 
-        self.api = api
+        self.api = api_key
 
         self.dates_id = dates_id
 
@@ -144,6 +159,9 @@ class Spaceboard(App):
         self.is_metric = True
 
     def make_table_group(self, tid: str) -> Vertical:
+        """
+        Creates the datatable automatically for each day (metric + imperial)
+        """
 
         label = Label("", id=f"{tid}_label", classes="tableDateLabel")
 
@@ -162,6 +180,10 @@ class Spaceboard(App):
         )
 
     def _add_new_row(self, table: DataTable, neo_obj):
+        """
+        Creates automatically the rows for every datatable taking the data from the object got with neo_req
+        """
+
         table.add_row(
             MiddleTxt(f"[link={neo_obj.link}]{neo_obj.name}[/link]"),
             MiddleTxt(neo_obj.id),
@@ -226,6 +248,9 @@ class Spaceboard(App):
 
     @work(thread=True)
     def data_update(self, api) -> None:
+        """
+        Get the new data using neo_req and store them in two lists
+        """
 
         limit_days = (list(self.dates_id.keys())[-2], list(self.dates_id.keys())[-1])
 
@@ -254,6 +279,7 @@ class Spaceboard(App):
             self.call_from_thread(self._store_data)
 
     def _store_data(self):
+        "Add the rows for each datatable and calculate the max_height for a stable scroll"
 
         max_rows = 0
 
@@ -324,7 +350,13 @@ class Spaceboard(App):
 
         self.switcher.styles.height = final_height
 
-    def update_current(self) -> None:
+    """Here we have all the micro-functions used in the BINDINGS"""
+
+    def update_current(
+        self,
+    ) -> (
+        None
+    ):  # a special function, used by all the others, to change the current datatable based on what change the user made
 
         self.switcher.current = (
             self.ordered_days_list[self.day_index]
@@ -332,23 +364,23 @@ class Spaceboard(App):
             else f"{self.ordered_days_list[self.day_index]}_imperial"
         )
 
-    def action_quit(self) -> None:
+    def action_quit(self) -> None:  # to close the software
 
         self.exit()
 
-    def action_toggle_units(self) -> None:
+    def action_toggle_units(self) -> None:  # to change the unit system
 
         self.is_metric = not self.is_metric
 
         self.update_current()
 
-    def action_go_right(self) -> None:
+    def action_go_right(self) -> None:  # go right in days
 
         self.day_index = (self.day_index + 1) % len(self.ordered_days_list)
 
         self.update_current()
 
-    def action_go_left(self) -> None:
+    def action_go_left(self) -> None:  # go left in days
 
         self.day_index = (self.day_index - 1) % len(self.ordered_days_list)
 

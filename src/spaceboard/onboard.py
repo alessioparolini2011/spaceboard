@@ -20,6 +20,10 @@ class OnBoard:
         pass
 
     def getapi(self) -> str:
+        """
+        Get the API from the user, and save it in a .spaceboard_env file that's autocreate the first time.
+        If exists yet, only get the key and return it for the dashboard
+        """
 
         if not ENV_PATH.exists():
 
@@ -58,6 +62,9 @@ class OnBoard:
             return NASA_API_KEY
 
     def getdates(self, limit) -> dict:
+        """
+        Calculate the 5 days windows and create the dictionary to store datatables, returning it for the dashboard
+        """
 
         cd = dt.date.today()
 
