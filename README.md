@@ -38,7 +38,7 @@ spaceboard
 > [!NOTE]
 >This is the first release of the software, and my first package. I know the structure and the logic aren't perfect, but I'm working on it (I'm splitting files in different sub-packages, improving functions and features, adding \_\_init\_\_.py and \_\_main\_\_.py...) in a V2 version. It was important to me to release it as soon as possible, for get feedbacks and improve it. Also Stardance event incorages developers to ship their projects starting from the MVP.
 
-At the first start, the software will give you the instructions to get your free NASA API key (**don't share it with anyone!**). Follow them and you will finally enjoy **spaceboard**!
+At the first start, the software will give you the instructions to get your free NASA API key (**don't share it with anyone!**). If you want to have only a look, use "DEMO_KEY" as API key value (you'll get a really small nunber of requets per day, but it's ok to avoid the configuration of a really one). Follow them and you will finally enjoy **spaceboard**!
 
 This is a preview of the dashboard in action:
 
@@ -54,6 +54,10 @@ The **`assets`** directory contains the logo and the gif preview of the README f
 
 > [!NOTE]
 > GitHub and Hack Club are two amazing communities for developers. Please, if you want to edit and improve the project, do it in a good way and respect the code of conduct of both communities. Make sure to respect the [Hack Club Code of Conduct](https://hackclub.com/conduct/) and the [GitHub Community Guidelines](https://docs.github.com/en/site-policy/github-terms/github-community-guidelines) before contributing. Make coding a better place for everyone. That said, happy coding!
+
+## AI usage
+
+I used AI to learn some of the skills I used in this project. **No code in this software is created by AI.**
 
 ## Credits
 
