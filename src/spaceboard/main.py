@@ -21,7 +21,7 @@ def start():
     dates_id = boarding.getdates(limit=2)
 
     app = Spaceboard(
-        api=NASA_API_KEY,
+        api_key=NASA_API_KEY,
         dates_id=dates_id,
     )
 
