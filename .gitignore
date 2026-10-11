@@ -1,7 +1,19 @@
+# virtual enviroment directories
+
 .venv
 
 __pycache__
 
-dist
+# directory created for the package
+
+dist/
 
 spaceboard.egg-info
+
+# pyinstaller resources
+
+build/
+
+*.manifest
+
+*.rc

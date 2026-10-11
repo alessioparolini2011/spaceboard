@@ -7,6 +7,8 @@ from rich.align import Align
 
 from rich.text import Text
 
+from pathlib import Path
+
 from textual.app import App, ComposeResult
 
 from textual.widgets import Footer, Label, DataTable, ContentSwitcher
@@ -21,6 +23,21 @@ from textual import work
 
 from spaceboard.client import fetch_neo_data, NasaError
 
+BASE_DIR = Path(__file__).parent.resolve()
+
+
+class MiddleTxt(Align):
+    """
+    A special class to make the text in the datatables more readable
+    """
+
+    def __init__(self, text: str, height: int = 3):
+        super().__init__(
+            Text.from_markup(text, justify="center"),
+            vertical="middle",
+            height=height,
+        )
+
 
 class ErrorScreen(ModalScreen):
     """
@@ -29,7 +46,7 @@ class ErrorScreen(ModalScreen):
 
     BINDINGS = [("e", "escape", "Close the window")]
 
-    CSS_PATH = "tcss/error_screen.tcss"
+    CSS_PATH = BASE_DIR / "tcss/error_screen.tcss"
 
     def __init__(
         self, name=None, id=None, classes=None, *, message: str = "Unknown Error!"
@@ -62,19 +79,6 @@ class ErrorScreen(ModalScreen):
     def action_escape(self):
 
         self.dismiss()
-
-
-class MiddleTxt(Align):
-    """
-    A special class to make the text in the datatables more readable
-    """
-
-    def __init__(self, text: str, height: int = 3):
-        super().__init__(
-            Text.from_markup(text, justify="center"),
-            vertical="middle",
-            height=height,
-        )
 
 
 class Spaceboard(App):
@@ -113,7 +117,7 @@ class Spaceboard(App):
         ),
     ]
 
-    CSS_PATH = "tcss/spaceboard.tcss"
+    CSS_PATH = BASE_DIR / "tcss/spaceboard.tcss"
 
     COLUMNS_METRIC = [
         "[b]NAME[/b]",
