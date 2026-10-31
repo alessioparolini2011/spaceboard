@@ -68,9 +68,6 @@ and then
 spaceboard
 ```
 
->[!TIP]
->If you don't want to use a real API KEY, you can type "`DEMO_KEY`" to use a "universal" API KEY, with less requests, but **perfect for a quick test or review!**
-
 > [!NOTE]
 >This is the first release of the software, and my first package. I know the structure and the logic aren't perfect, but I'm working on it (I'm splitting files in different sub-packages, improving functions and features, adding \_\_init\_\_.py for every package and \_\_main\_\_.py...) in a V2 version. It was important to me to release it as soon as possible, for get feedbacks and improve it. Also Stardance event incorages developers to ship their projects starting from the MVP.
 
@@ -83,6 +80,9 @@ Go to the latest release of the executable file [here](https://github.com/alessi
 
 
 At the first start, the software will give you the instructions to get your free NASA API key (**don't share it with anyone!**). If you want to have only a look, use "DEMO_KEY" as API key value (you'll get a really small nunber of requets per day, but it's ok to avoid the configuration of a really one). Follow them and you will finally enjoy **spaceboard**!
+
+>[!TIP]
+>If you don't want to use a real API KEY, you can type "`DEMO_KEY`" to use a "universal" API KEY, with less requests, but **perfect for a quick test or review!**
 
 This is a preview of the dashboard in action:
 
