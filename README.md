@@ -78,11 +78,9 @@ Go to the latest release of the executable file [here](https://github.com/alessi
 **Antivirus Warning (False Positives)**: When you run the standalone .exe version for the first time, Windows Defender or other antivirus software might pop up an alert (like "Windows Protected your PC"). Don't panic! This is a 100% false positive. Because this application is compiled using PyInstaller and is not signed with an expensive Microsoft Developer Certificate, Windows blocks it by default to be safe. To run it, simply click on "More info" and then select "Run anyway". If you want to be completely sure, you can always inspect the full open-source code inside this repository or use the standard pip install spaceboard method.
 
 
-
-At the first start, the software will give you the instructions to get your free NASA API key (**don't share it with anyone!**). If you want to have only a look, use "DEMO_KEY" as API key value (you'll get a really small nunber of requets per day, but it's ok to avoid the configuration of a really one). Follow them and you will finally enjoy **spaceboard**!
-
 >[!TIP]
->If you don't want to use a real API KEY, you can type "`DEMO_KEY`" to use a "universal" API KEY, with less requests, but **perfect for a quick test or review!**
+>At the first start, the software will give you the instructions to get your free NASA API key (**don't share it with anyone!**). If you want to have only a  quick look, use "DEMO_KEY" as API key value (you'll get a really small number of requets per day, but it's ok to avoid the configuration of a really one). Follow them and you will finally enjoy **spaceboard**!
+
 
 This is a preview of the dashboard in action:
 
