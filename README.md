@@ -68,6 +68,9 @@ and then
 spaceboard
 ```
 
+>[!TIP]
+>If you don't want to use a real API KEY, you can type "`DEMO_KEY`" to use a "universal" API KEY, with less requests, but **perfect for a quick test or review!**
+
 > [!NOTE]
 >This is the first release of the software, and my first package. I know the structure and the logic aren't perfect, but I'm working on it (I'm splitting files in different sub-packages, improving functions and features, adding \_\_init\_\_.py for every package and \_\_main\_\_.py...) in a V2 version. It was important to me to release it as soon as possible, for get feedbacks and improve it. Also Stardance event incorages developers to ship their projects starting from the MVP.
 
@@ -92,6 +95,8 @@ This is a preview of the dashboard in action:
 ## AI usage
 
 I used AI to learn some of the skills I used in this project. **No code in this software is created by AI.**
+
+I've received reports saying I used IA for my README. I swear **this isn't true**. I'm italian, and it's normal my english look accademic and it seems like it's done by IA, but it's not. I just wanted to clarify that.
 
 ## Credits
 
