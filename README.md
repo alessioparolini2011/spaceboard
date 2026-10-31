@@ -94,7 +94,7 @@ This is a preview of the dashboard in action:
 
 I used AI to learn some of the skills I used in this project. **No code in this software is created by AI.**
 
-I've received reports saying I used IA for my README. I swear **this isn't true**. I'm italian, and it's normal my english look accademic and it seems like it's done by IA, but it's not. I just wanted to clarify that.
+I've received reports saying I used IA for my README. I swear **this isn't true**. I'm Italian, and it's normal my English look accademic and it seems like it's done by IA, but it's not. I just wanted to clarify that.
 
 ## Credits
 
